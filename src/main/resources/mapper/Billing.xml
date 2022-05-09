@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="billing">
+	<select id="selectPlanCode" parameterType="Map" resultType="Map">
+		select * from NetMiner.PLAN_CODE 
+		WHERE PLAN_CODE= ${planCode}
+	</select>
+	
+	<select id="selectSubscript" parameterType="Map" resultType="Map">
+		select A.*, B.*
+			, TIMESTAMPDIFF(DAY, DATE_FORMAT(NOW(),'%Y-%m-%d'),DATE_FORMAT(EXITS_DATE,'%Y-%m-%d')) AS DIFF_DAY
+			, DATEDIFF(left(now(),10),left(A.REG_DATE,10))+1 AS STARTFOR_DIFF_DAY
+		from NetMiner.SUBSCRIPT AS A 
+		INNER JOIN NetMiner.PLAN_CODE  AS B ON A.PLAN_CODE = B.PLAN_CODE 
+		where UUID = (select uuid from NetMiner.MEMBER_INFO where USER_ID = #{userId})
+		order by A.no desc limit 1
+	</select>
+	<select id="checkUserTiralInfo" parameterType="Map" resultType="Map">
+		select *
+		from NetMiner.SUBSCRIPT AS A 
+		WHERE  UUID = (select uuid from NetMiner.MEMBER_INFO where USER_ID = #{userId})
+		AND PLAN_CODE= '01'
+		order by no desc
+		limit 1
+	</select>
+	
+	<update id="insertSubscript" parameterType="BillingVo">
+	INSERT INTO NetMiner.SUBSCRIPT (
+		REG_DATE, USER_ID
+		, PLAN_CODE, PLAN_TYPE, DATE_TYPE, PAY_TYPE
+		, PAY_STEP , PAY_PLATFORM, PAY_PRICE, PAY_PRICE_TOTAL
+		, ACCOUNT_NAME, ACCOUNT_NO, ACCOUNT_HOLDER, ACCOUNT_DEPOSITLIMIT
+		, ORDER_ID, ORDER_PNM, paymentKey, amount, EXITS_DATE, UUID, COMPANY, NATION, USE_CODE,LANGUAGE) 
+	<choose>
+		<when test="diffDay > 0">
+		SELECT now(), #{USER_ID}
+		, #{PLAN_CODE}, #{PLAN_TYPE}, #{DATE_TYPE}, #{PAY_TYPE}
+		, #{PAY_STEP}, #{PAY_PLATFORM}, #{PAY_PRICE}, #{PAY_PRICE_TOTAL}
+		, #{ACCOUNT_NAME}, #{ACCOUNT_NO}, #{ACCOUNT_HOLDER}, now()
+		, #{ORDER_ID}, #{ORDER_PNM}, #{paymentKey}, #{amount},
+			 DATE_FORMAT(DATE_ADD(now(), INTERVAL #{diffDay} DAY), '%Y-%m-%d %H:%i:%S')  AS EXITS_DATE
+		,UUID, COMPANY, NATION, USE_CODE,LANGUAGE
+		</when>
+		<otherwise>
+	SELECT now(), #{USER_ID}
+		, #{PLAN_CODE}, #{PLAN_TYPE}, #{DATE_TYPE}, #{PAY_TYPE}
+		, #{PAY_STEP}, #{PAY_PLATFORM}, #{PAY_PRICE}, #{PAY_PRICE_TOTAL}
+		, #{ACCOUNT_NAME}, #{ACCOUNT_NO}, #{ACCOUNT_HOLDER}, now()
+		, #{ORDER_ID}, #{ORDER_PNM}, #{paymentKey}, #{amount},
+			CASE WHEN #{DATE_TYPE} = 'month' 
+			THEN DATE_FORMAT(DATE_ADD(now(), INTERVAL 1 MONTH) , '%Y-%m-%d %H:%i:%S') 
+			ELSE DATE_FORMAT(DATE_ADD(now(), INTERVAL 1 YEAR) , '%Y-%m-%d %H:%i:%S')
+			END AS EXITS_DATE
+		,UUID, COMPANY, NATION, USE_CODE, LANGUAGE
+		</otherwise> 
+	</choose>			
+		FROM NetMiner.MEMBER_INFO 
+		WHERE USER_ID = #{USER_ID};
+	</update>
+	
+	<select id="selectSubscriptAll" parameterType="Map" resultType="Map">
+		select A.*, B.* 
+		from NetMiner.SUBSCRIPT AS A 
+		INNER JOIN NetMiner.PLAN_CODE  AS B ON A.PLAN_CODE = B.PLAN_CODE
+		where UUID = (select uuid from NetMiner.MEMBER_INFO where USER_ID = #{userId})
+		AND A.REG_DATE  <![CDATA[>=]]> DATE_ADD(NOW(), INTERVAL -3 MONTH)
+		AND A.PLAN_CODE != '01'
+		order by A.REG_DATE DESC;
+	</select>
+	
+	<select id="selectSubscriptOne" parameterType="Map" resultType="Map">
+		select DATE_FORMAT(A.REG_DATE, '%Y-%m-%d') AS REG_DATE_KO, DATE_FORMAT(A.REG_DATE, '%m/%d/%Y') AS REG_DATE_EN , A.USER_ID, A.PLAN_CODE, A.PLAN_TYPE, A.PAY_PLATFORM, A.PAY_STEP, A.PAY_TYPE, A.PAY_PRICE, A.PAY_PRICE_TOTAL,
+				 A.ACCOUNT_NAME, A.ACCOUNT_NO, A.ACCOUNT_HOLDER, A.ACCOUNT_DEPOSITLIMIT, A.ORDER_ID, A.ORDER_PNM, A.paymentKey, A.amount 
+				 , DATE_FORMAT( DATE_SUB( A.EXITS_DATE, INTERVAL 1 DAY), '%Y-%m-%d') AS EXITS_DATE_KO, DATE_FORMAT(DATE_SUB( A.EXITS_DATE, INTERVAL 1 DAY), '%m/%d/%Y') AS EXITS_DATE_EN
+			, B.* 
+		from NetMiner.SUBSCRIPT AS A 
+		INNER JOIN NetMiner.PLAN_CODE  AS B ON A.PLAN_CODE = B.PLAN_CODE
+		where A.NO =#{billingNo};
+	</select>
+	
+	<select id="selectFaqList" parameterType="Map" resultType = "Map">
+	select * from NetMiner.FAQ
+	where language = #{language}
+	AND CATE_CODE = '01'
+	;
+	</select>
+	
+</mapper>

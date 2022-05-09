@@ -1,0 +1,426 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+ <mapper namespace="member">
+	<resultMap type="com.netMiner.app.model.vo.MemberVo" id="MemberVo">
+		<id property="no" column="NO"/>
+ 		<result property="userId" column="USER_ID"/>
+ 		<result property="userCode" column="USER_CODE"/>
+ 		<result property="typeCode" column="TYPE_CODE"/>
+ 		<result property="userPwd" column="USER_PWD"/>
+ 		<result property="company" column="COMPANY"/>
+ 		<result property="nation" column="NATION"/>
+ 		<result property="useCode" column="USE_CODE"/>
+ 		<result property="language" column = "LANGUAGE"/>
+ 		<result property="marketYn" column="MARKET_YN"/>
+ 		<result property="googleYn" column="GOOGLE_YN"/>
+ 		<result property="userStatsYn" column = "USER_STATS_YN"/>
+ 		<result property="lastLoginDate" column = "LAST_LOGIN_DATE"/>
+ 		<result property="exitsDate" column = "EXITS_DATE"/>
+ 		<result property="UUID" column = "UUID"/>
+ 		<result property="SUBSCRIPT_YN" column = "SUBSCRIPT_YN"/>
+ 		<result property="CHECK_TRIAL" column = "CHECK_TRIAL"/>
+ 		<result property="DIFF_DAY" column = "DIFF_DAY"/>
+ 		<result property="CHECK_PLAN_CODE" column="CHECK_PLAN_CODE"/>
+ 	</resultMap> 
+ 	<select id="selectDate" resultType="String">
+ 		select now();
+ 	</select>
+ 
+ 	<select id="getUserInfo" resultMap="MemberVo" parameterType="MemberVo">
+		SELECT a.*, password(#{userPwd}) chk
+			, (SELECT CASE WHEN (
+				SELECT COUNT(1) FROM (
+					SELECT  EXITS_DATE , REG_DATE AS SUBSCRIPT_REG_DATE
+					FROM NetMiner.SUBSCRIPT
+					WHERE UUID = (select uuid from NetMiner.MEMBER_INFO where USER_ID = #{userId})
+					order by no desc limit 1
+				) AS A
+			) = 0 THEN 'N' ELSE 'Y' END SUBSCRIPT_YN FROM DUAL) as SUBSCRIPT_YN
+			, (
+				select COUNT(1)
+				FROM NetMiner.SUBSCRIPT s2
+				WHERE UUID = (select uuid from NetMiner.MEMBER_INFO where USER_ID = #{userId}) and PLAN_CODE ='01'
+			) AS CHECK_TRIAL
+			, (
+				SELECT TIMESTAMPDIFF(DAY, NOW(),EXITS_DATE) AS DIFF_DAY 
+				FROM NetMiner.SUBSCRIPT s2
+				WHERE UUID = (select uuid from NetMiner.MEMBER_INFO where USER_ID = #{userId})
+				order by s2.no desc limit 1
+			) AS DIFF_DAY
+			, (
+				SELECT PLAN_CODE 
+				FROM NetMiner.SUBSCRIPT s2
+				WHERE UUID = (select uuid from NetMiner.MEMBER_INFO where USER_ID = #{userId})
+				order by s2.no desc limit 1
+			) AS CHECK_PLAN_CODE
+			, (
+				SELECT ifnull(max(DATE_FORMAT(EXITS_DATE,'%Y-%m-%d %H:%i:%s')),'')EXITS_DATE 
+				FROM NetMiner.SUBSCRIPT s2
+				WHERE UUID = (select uuid from NetMiner.MEMBER_INFO where USER_ID = #{userId})
+				order by s2.no desc limit 1
+			) AS EXITS_DATE
+		FROM NetMiner.MEMBER_INFO a
+			WHERE USER_ID = #{userId}
+		UNION ALL
+		SELECT a.*, password(#{userPwd}) chk
+			, (
+				SELECT CASE WHEN (
+					SELECT COUNT(1) FROM (
+						SELECT EXITS_DATE, REG_DATE AS SUBSCRIPT_REG_DATE
+						FROM NetMiner.SUBSCRIPT
+						WHERE UUID = (select uuid from NetMiner.MEMBER_INFO where USER_ID = #{userId})
+						order by no desc limit 1
+					) AS A
+				) = 0 THEN 'N' ELSE 'Y' END SUBSCRIPT_YN
+				FROM DUAL ) as SUBSCRIPT_YN
+			, (
+				select COUNT(1)
+				FROM NetMiner.SUBSCRIPT s2
+				WHERE UUID = (select uuid from NetMiner.MEMBER_INFO where USER_ID = #{userId}) and PLAN_CODE ='01'
+			) AS CHECK_TRIAL
+			, (
+				SELECT TIMESTAMPDIFF(DAY, NOW(),EXITS_DATE) AS DIFF_DAY 
+				FROM NetMiner.SUBSCRIPT s2
+				WHERE UUID = (select uuid from NetMiner.MEMBER_INFO where USER_ID = #{userId})
+				order by s2.no desc limit 1
+			) AS DIFF_DAY
+			, (
+				SELECT PLAN_CODE 
+				FROM NetMiner.SUBSCRIPT s2
+				WHERE UUID = (select uuid from NetMiner.MEMBER_INFO where USER_ID = #{userId})
+				order by s2.no desc limit 1
+			) AS CHECK_PLAN_CODE
+			, (
+				SELECT ifnull(max(DATE_FORMAT(EXITS_DATE,'%Y-%m-%d %H:%i:%s')),'')EXITS_DATE 
+				FROM NetMiner.SUBSCRIPT s2
+				WHERE UUID = (select uuid from NetMiner.MEMBER_INFO where USER_ID = #{userId})
+				order by s2.no desc limit 1
+			) AS EXITS_DATE
+		FROM NetMiner.MEMBER_INFO_DROP a
+		WHERE USER_ID = #{userId}
+ 	</select>
+ 	<select id = "getUserInfoPayComplete" resultMap="MemberVo" parameterType="MemberVo">
+	 	SELECT a.*
+			, (SELECT CASE WHEN (
+				SELECT COUNT(1) FROM (
+					SELECT  EXITS_DATE , REG_DATE AS SUBSCRIPT_REG_DATE
+					FROM NetMiner.SUBSCRIPT
+					WHERE UUID = (select uuid from NetMiner.MEMBER_INFO where USER_ID = #{userId})
+					order by no desc limit 1
+				) AS A
+			) = 0 THEN 'N' ELSE 'Y' END SUBSCRIPT_YN
+			FROM DUAL) as SUBSCRIPT_YN
+			, (
+				select COUNT(1)
+				FROM NetMiner.SUBSCRIPT s2
+				WHERE UUID = (select uuid from NetMiner.MEMBER_INFO where USER_ID = #{userId}) and PLAN_CODE ='01'
+			) AS CHECK_TRIAL
+			, (
+				SELECT TIMESTAMPDIFF(DAY, NOW(),EXITS_DATE) AS DIFF_DAY 
+				FROM NetMiner.SUBSCRIPT s2
+				WHERE UUID = (select uuid from NetMiner.MEMBER_INFO where USER_ID = #{userId})
+				order by s2.no desc limit 1
+			) AS DIFF_DAY
+			, (
+				SELECT PLAN_CODE 
+				FROM NetMiner.SUBSCRIPT s2
+				WHERE UUID = (select uuid from NetMiner.MEMBER_INFO where USER_ID = #{userId})
+				order by s2.no desc limit 1
+			) AS CHECK_PLAN_CODE
+			, (
+				SELECT ifnull(max(DATE_FORMAT(EXITS_DATE,'%Y-%m-%d %H:%i:%s')),'')EXITS_DATE 
+				FROM NetMiner.SUBSCRIPT s2
+				WHERE UUID = (select uuid from NetMiner.MEMBER_INFO where USER_ID = #{userId})
+				order by s2.no desc limit 1
+			) AS EXITS_DATE
+		FROM NetMiner.MEMBER_INFO a
+		WHERE USER_ID = #{userId}
+		UNION ALL
+		SELECT a.*
+			, (
+				SELECT CASE WHEN (
+					SELECT COUNT(1) FROM (
+						SELECT EXITS_DATE , REG_DATE AS SUBSCRIPT_REG_DATE
+						FROM NetMiner.SUBSCRIPT
+						WHERE UUID = (select uuid from NetMiner.MEMBER_INFO where USER_ID = #{userId})
+						order by no desc limit 1
+					) AS A
+				) = 0 THEN 'N' ELSE 'Y' END SUBSCRIPT_YN
+				FROM DUAL
+			) as SUBSCRIPT_YN
+			, (
+				select COUNT(1)
+				FROM NetMiner.SUBSCRIPT s2
+				WHERE UUID = (select uuid from NetMiner.MEMBER_INFO where USER_ID = #{userId}) and PLAN_CODE ='01'
+			) AS CHECK_TRIAL
+			, (
+				SELECT TIMESTAMPDIFF(DAY, NOW(),EXITS_DATE) AS DIFF_DAY 
+				FROM NetMiner.SUBSCRIPT s2
+				WHERE UUID = (select uuid from NetMiner.MEMBER_INFO where USER_ID = #{userId})
+				order by s2.no desc limit 1
+			) AS DIFF_DAY
+			, (
+				SELECT PLAN_CODE 
+				FROM NetMiner.SUBSCRIPT s2
+				WHERE UUID = (select uuid from NetMiner.MEMBER_INFO where USER_ID = #{userId})
+				order by s2.no desc limit 1
+			) AS CHECK_PLAN_CODE
+			, (
+				SELECT ifnull(max(DATE_FORMAT(EXITS_DATE,'%Y-%m-%d %H:%i:%s')),'')EXITS_DATE 
+				FROM NetMiner.SUBSCRIPT s2
+				WHERE UUID = (select uuid from NetMiner.MEMBER_INFO where USER_ID = #{userId})
+				order by s2.no desc limit 1
+			) AS EXITS_DATE
+		FROM NetMiner.MEMBER_INFO_DROP a
+		WHERE USER_ID = #{userId}
+ 	</select>
+ 	
+ 	<select id="getLoginUserInfoXXX" resultMap="MemberVo" parameterType="MemberVo">
+	 	SELECT *
+		FROM NetMiner.MEMBER_INFO
+		WHERE USER_ID =  #{userId}
+			AND USER_PWD  = password(#{userPwd})
+			AND USER_STATS_YN = 'N'
+ 	</select>
+ 	
+ 	<select id="getDormantUserInfoXXX" resultMap="MemberVo" parameterType="MemberVo">
+	 	SELECT a.*, password(#{userPwd}) chk
+		FROM NetMiner.MEMBER_INFO_DROP a
+		WHERE USER_ID =  #{userId}
+ 	</select>
+ 	
+ 	<update id="updateLastLoginDate" parameterType="MemberVo">
+	 	UPDATE NetMiner.MEMBER_INFO 
+	 	SET LAST_LOGIN_DATE = NOW()
+	 	WHERE USER_ID = #{userId}
+ 	</update>
+ 	
+ 	<select id="checkUser" parameterType="String" resultType="Integer">
+	 	SELECT COUNT(1) FROM NetMiner.MEMBER_INFO 
+	 	WHERE USER_ID = #{userId};
+ 	</select>
+ 	
+ 	<select id="checkDropUser" parameterType="String" resultType="Integer">
+	 	SELECT COUNT(1) FROM NetMiner.MEMBER_INFO_DROP
+	 	WHERE USER_ID = #{userId};
+ 	</select>
+ 	
+ 	<update id="updateNewUserInfo" parameterType="Map">
+	 	UPDATE NetMiner.MEMBER_INFO
+		SET  UPDATE_DATE = NOW()
+			<if test="useCode!=null and !useCode.equals('')">, USE_CODE= #{useCode}</if>
+			<if test="language!=null and !language.equals('')">, LANGUAGE= #{language}</if>
+			<if test="nation!=null and !nation.equals('')">, NATION= #{nation}</if>
+			<if test="company!=null and !company.equals('')">, COMPANY= #{company}</if>
+			<if test="marketYn!=null and !marketYn.equals('')">, MARKET_YN= #{marketYn}</if>
+			<if test='marketYn.equals("Y")'>,MARKET_DATE = NOW()</if>
+		WHERE  USER_ID = #{oldUserId};
+ 	</update>
+ 	
+ 	<update id="updateUserId" parameterType="Map">
+	 	UPDATE NetMiner.MEMBER_INFO
+	 	SET USER_ID = #{newUserId}
+	 	WHERE USER_ID = #{userId}; 	
+ 	</update>
+ 	
+ 	<select id="selectUserCount" parameterType="Map" resultType="Integer">
+	 	SELECT COUNT(1) FROM NetMiner.MEMBER_INFO 
+	 	WHERE USER_ID = #{newUserId};
+ 	</select>
+ 	
+ 	<update id="updateNewPwd" parameterType="MemberVo">
+	 	UPDATE NetMiner.MEMBER_INFO
+	 	SET USER_PWD = password(#{userPwd})
+	 	WHERE USER_ID = #{userId}; 	
+ 	</update>
+ 	
+ 	<select id="checkJoin" resultMap="MemberVo" parameterType="MemberVo">
+	 	select * from NetMiner.MEMBER_INFO mi 
+		where mi.USER_ID = #{userId};
+ 	</select>
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	<delete id="deleteTempUser">
+ 	<![CDATA[
+	DELETE FROM NetMiner.MEMBER_INFO_TEMP WHERE REG_DATE <= DATE_ADD(NOW() , INTERVAL -30 MINUTE);
+ 	]]>
+ 	</delete>
+ 	
+ 	<insert id="returnUserInfo" parameterType="MemberVo">
+ 	INSERT INTO NetMiner.MEMBER_INFO(UUID
+ 		, USER_CODE,USER_ID, USER_PWD, COMPANY, NATION, USE_CODE, LANGUAGE ,MARKET_YN
+ 		, MARKET_DATE, GOOGLE_YN, LAST_LOGIN_DATE, REG_DATE)
+	SELECT * FROM (
+		SELECT uuid() UUID
+			, '02' AS USER_CODE, USER_ID, USER_PWD, COMPANY, NATION, USE_CODE, LANGUAGE ,MARKET_YN
+			, MARKET_DATE, GOOGLE_YN, now() AS LAST_LOGIN_DATE, REG_DATE
+		FROM NetMiner.MEMBER_INFO_DROP WHERE USER_ID =  #{userId}
+	) A;
+ 	</insert>
+	<select id="returnNo" resultType="Integer"  parameterType="MemberVo">
+		SELECT `NO` FROM NetMiner.MEMBER_INFO WHERE USER_ID = #{userId};
+	</select>
+ 	
+ 	<delete id="deletDropMember" parameterType="MemberVo">
+	DELETE FROM NetMiner.MEMBER_INFO_DROP WHERE USER_ID =  #{userId};
+ 	</delete>
+ 	
+ 	<insert id="insertSignUp" parameterType="MemberVo">
+ 	INSERT INTO NetMiner.MEMBER_INFO(UUID
+ 		, USER_ID, USER_PWD, COMPANY, NATION, USE_CODE, LANGUAGE ,MARKET_YN ,MARKET_DATE
+ 		, GOOGLE_YN, LAST_LOGIN_DATE, REG_DATE)
+	VALUES( uuid()
+		, #{userId} , PASSWORD(#{userPwd}) , #{company}, #{nation}  , #{useCode} , #{language} ,#{marketYn}
+		, now(), #{googleYn},now(), now()
+	);
+	
+ 	</insert>
+	<delete id="deleteMemberInfoTmp">
+	DELETE FROM NetMiner.MEMBER_INFO_TEMP WHERE USER_ID = #{userId};
+ 	</delete>
+ 	
+ 	<update id="updateAuthkey" parameterType="MemberVo">
+ 	UPDATE NetMiner.MEMBER_INFO
+ 	SET AUTHKEY = #{authKey}
+ 	WHERE USER_ID = #{userId};
+ 	</update>
+ 	
+ 	
+ 	<insert id="insertMemberInfoTmp" parameterType="MemberVo">
+ 	INSERT INTO NetMiner.MEMBER_INFO_TEMP
+		( USER_ID, USER_PWD, COMPANY, NATION, USE_CODE, LANGUAGE, REG_DATE )
+	VALUES( 
+		#{userId} , PASSWORD(#{userPwd}) , #{company}, #{nation}  , #{useCode} , #{language} , NOW()
+	);
+ 	</insert>
+ 	
+ 	<select id="getUserInfoTmp" resultMap="MemberVo" parameterType="MemberVo">
+ 	select * from NetMiner.MEMBER_INFO_TEMP
+ 	where USER_ID = #{userId}
+ 	and no = (select MAX(NO) from NetMiner.MEMBER_INFO_TEMP
+			 	where USER_ID = #{userId}
+			 	ORDER BY REG_DATE DESC);
+ 	</select>
+ 	
+ 	<insert id="signUpGeneral" parameterType="MemberVo">
+ 	INSERT INTO NetMiner.MEMBER_INFO
+		( UUID, USER_ID, USER_PWD, COMPANY, NATION, USE_CODE, LANGUAGE ,MARKET_YN ,MARKET_DATE,GOOGLE_YN ,LAST_LOGIN_DATE, REG_DATE)
+	SELECT 
+		uuid() UUID, USER_ID, USER_PWD, COMPANY, NATION, USE_CODE, `LANGUAGE` ,#{marketYn} AS MARKET_YN , NOW() AS MARKET_DATE,#{googleYn} AS GOOGLE_YN, NOW() AS LAST_LOGIN_DATE, NOW() AS LAST_LOGIN_DATE  
+	FROM NetMiner.MEMBER_INFO_TEMP WHERE USER_ID = #{userId} 
+	AND NO = (select MAX(NO) from NetMiner.MEMBER_INFO_TEMP
+			 	where USER_ID = #{userId}
+			 	ORDER BY REG_DATE DESC)
+ 	;
+ 	</insert>
+ 	
+ 	
+ 	
+ 	
+ 	<select id="getLastLoginFerYear"  resultType="Map">
+ 	<![CDATA[
+ 	SELECT USER_ID, LANGUAGE 
+ 	FROM NetMiner.MEMBER_INFO 
+ 	WHERE TIMESTAMPDIFF(DAY, LAST_LOGIN_DATE, NOW()) = 365
+ 	AND USER_CODE = '02';
+ 	]]>
+ 	</select>
+ 	
+ 	<update id="changeMemberInfo" parameterType="MemberVo">
+ 	INSERT INTO NetMiner.MEMBER_INFO_DROP(
+ 		USER_CODE, USER_ID, USER_PWD, COMPANY, NATION, `LANGUAGE`
+		, USE_CODE, LAST_LOGIN_DATE, MARKET_YN, MARKET_DATE, GOOGLE_YN, REG_DATE
+		, USER_OUT_DATE, USER_STATS_YN, UPDATE_DATE)
+	SELECT A.* FROM (
+		SELECT
+		'03' AS 'USER_CODE', USER_ID, USER_PWD, COMPANY, NATION, `LANGUAGE`
+		, USE_CODE, LAST_LOGIN_DATE, MARKET_YN, MARKET_DATE, GOOGLE_YN, REG_DATE
+		, NOW() AS 'USER_OUT_DATE', #{userStatsYn} USER_STATS_YN, UPDATE_DATE 
+		FROM NetMiner.MEMBER_INFO 
+		WHERE USER_ID = #{userId}
+	) AS A
+ 	</update>
+ 	<update id="getPassByDormant">
+ 	UPDATE NetMiner.MEMBER_INFO 
+ 	SET USER_OUT_DATE = NOW(),
+ 	USER_STATS_YN = 'Y'
+ 	WHERE TIMESTAMPDIFF(DAY, LAST_LOGIN_DATE, NOW()) = 395
+ 	AND USER_CODE = '03'
+ 	</update>
+ 	
+ 	<select id="getMarketYnUser" resultType="Map">
+ 	<![CDATA[
+ 	SELECT USER_ID, `LANGUAGE` , MARKET_DATE 
+ 	FROM NetMiner.MEMBER_INFO 
+ 	WHERE TIMESTAMPDIFF(DAY, MARKET_DATE, NOW()) = 731
+ 	AND USER_CODE = '02'
+ 	AND MARKET_YN = 'Y'
+ 	AND `LANGUAGE` = 'ko'
+ 	AND NATION = 'KR';
+ 	]]>
+ 	</select>
+ 	
+ 	<delete id="deleteEmailSendLog" parameterType="String">
+ 	DELETE FROM NetMiner.CHECK_SEND_AUTH_MAIL_LOG
+ 	WHERE USER_ID = #{userId};
+ 	</delete>
+ 	
+ 	<delete id="deleteDropMember">
+ 	DELETE FROM NetMiner.MEMBER_INFO_DROP
+ 	WHERE USER_STATS_YN  = 'Y'
+ 	AND TIMESTAMPDIFF(DAY,USER_OUT_DATE,NOW()) = 365; 
+ 	</delete>
+ 	
+ 	<select id="checkRandomNumber" parameterType="Map" resultType="Map">
+ 	<![CDATA[
+ 	SELECT CASE WHEN NOW() < END_DATE THEN 'Y'
+	   ELSE 'N' END DATE_CHECK , AUTH_CODE 
+ 	FROM NetMiner.CHECK_SEND_AUTH_MAIL_LOG
+ 	WHERE USER_ID = #{userId}
+ 	AND NO = (SELECT MAX(NO) FROM NetMiner.CHECK_SEND_AUTH_MAIL_LOG WHERE USER_ID = #{userId});
+ 	]]>
+ 	</select>
+ 	
+ 	<select id="getPayPlanUser" resultType="Map">
+ 	<![CDATA[
+	 	SELECT USER_ID, C.LANGUAGE, C.END_DATE FROM (
+			SELECT `NO` , A.USER_ID
+				, DATE_FORMAT(DATE_ADD(A.EXITS_DATE, INTERVAL -3 DAY), '%Y-%m-%d') AS PAY_END_DATE
+				, B.LANGUAGE ,DATE_FORMAT(A.EXITS_DATE , '%Y-%m-%d') AS END_DATE
+			FROM NetMiner.SUBSCRIPT AS A
+			INNER JOIN (
+				SELECT UUID, LANGUAGE FROM NetMiner.MEMBER_INFO mi
+			) AS B ON A.UUID  = B.UUID 
+			WHERE NO IN (SELECT MAX(NO) FROM NetMiner.SUBSCRIPT s2 GROUP BY UUID)
+		) AS C
+		WHERE C.PAY_END_DATE = DATE_FORMAT(NOW(), '%Y-%m-%d')
+ 	]]>
+ 	
+ 	</select>
+ </mapper>

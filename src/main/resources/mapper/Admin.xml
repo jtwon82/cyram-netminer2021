@@ -1,0 +1,670 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="admin">
+
+	<select id="selectDate" resultType="String">
+		select now();
+	</select>
+	
+	<sql id="listPagedWhere">
+		WHERE 1=1
+		<if test="SEARCH_KEY!=null and !SEARCH_KEY.equals('')">
+			AND ${SEARCH_KEY} LIKE '%${SEARCH_VALUE}%'
+		</if>
+		<if test="USE_CODE!=null and !USE_CODE.equals('')">
+			AND USE_CODE = #{USE_CODE}
+		</if>
+		<if test="LANGUAGE!=null and !LANGUAGE.equals('')">
+			AND LANGUAGE = #{LANGUAGE}
+		</if>
+		<if test="MARKET_YN!=null and !MARKET_YN.equals('')">
+			AND MARKET_YN = #{MARKET_YN}
+		</if>
+		<if test="SDATE!=null and !SDATE.equals('')">
+			AND REG_DATE &gt;= #{SDATE}
+		</if>
+		<if test="EDATE!=null and !EDATE.equals('')">
+			AND REG_DATE &lt;= #{EDATE}
+		</if>
+		
+		<if test="PLAN_CODE!=null and !PLAN_CODE.equals('')">
+			AND PLAN_CODE= #{PLAN_CODE}
+		</if>
+		<if test="SC_PLAN_CODE!=null and !SC_PLAN_CODE.equals('')">
+			AND SC_PLAN_CODE= #{SC_PLAN_CODE}
+		</if>
+		<if test="DATE_TYPE!=null and !DATE_TYPE.equals('')">
+			AND DATE_TYPE = #{DATE_TYPE}
+		</if>
+		
+		<if test="MB_USE_CODE!=null and !MB_USE_CODE.equals('')">
+			AND MB_USE_CODE = #{MB_USE_CODE}
+		</if>
+		<if test="MB_TYPE_CODE!=null and !MB_TYPE_CODE.equals('')">
+			AND MB_TYPE_CODE = #{MB_TYPE_CODE}
+		</if>
+		<if test="MB_NATION!=null and !MB_NATION.equals('')">
+			AND MB_NATION = #{MB_NATION}
+		</if>
+		<if test="MB_LANGUAGE!=null and !MB_LANGUAGE.equals('')">
+			AND MB_LANGUAGE = #{MB_LANGUAGE}
+		</if>
+		<if test="MB_COMPANY!=null and !MB_COMPANY.equals('')">
+			AND MB_COMPANY= #{MB_COMPANY}
+		</if>
+		
+		<if test="USER_CODE_STATS!=null and USER_CODE_STATS=='QUIT' ">
+			AND USER_CODE = '03'
+			AND USER_STATS_YN = 'Y'
+		</if>
+		<if test="USER_CODE_STATS!=null and USER_CODE_STATS=='REST'">
+			AND USER_CODE = '03'
+			AND USER_STATS_YN = 'N'
+		</if>
+		
+		
+		<if test="CATE_CODE!=null and !CATE_CODE.equals('')">
+			AND CATE_CODE= #{CATE_CODE}
+		</if>
+	</sql>
+	<sql id="listPagedWhere2">
+		WHERE 1=1
+		<if test="_parameter.containsKey('firstOffset')">
+			AND NO.rownum BETWEEN #{firstOffset} AND #{lastOffset}
+		</if>
+	</sql>
+	<sql id="listPagedWhere3">
+		WHERE 1=1
+		<if test="_parameter.containsKey('page')">
+			AND page= ${page}
+		</if>
+	</sql>
+
+
+
+
+	<select id="getAdminCount" parameterType="map" resultType="int">
+		/* getAdminCount */
+		SELECT * FROM (
+			SELECT COUNT(1)totcnt, 1 rownum
+			FROM NetMiner.ADMIN_INFO A
+			<include refid="listPagedWhere"/>
+		) NO
+	</select>
+	
+	<select id="getAdminList" parameterType="map" resultType="map">
+		/* getAdminList */
+		SELECT * FROM (
+			SELECT A.*
+				, CEIL(RNUM / 10) as page
+			FROM (
+				SELECT A.*
+					, DATE_FORMAT(REG_DATE,'%Y-%m-%d')REG_DATES
+					, ROW_NUMBER() OVER (ORDER BY NO DESC) AS RNUM
+				FROM NetMiner.ADMIN_INFO A
+				<include refid="listPagedWhere"/>
+			)A
+		) NO
+		<include refid="listPagedWhere3"/>
+	</select>
+	
+	<select id="getAdminInfo" parameterType="map" resultType="map">
+		/* getAdminInfo */
+		SELECT A.*
+			, DATE_FORMAT(REG_DATE,'%Y-%m-%d')REG_DATES
+			<if test="ADMIN_PWD!=''">, password(#{pwd}) pwd</if>
+		FROM NetMiner.ADMIN_INFO A
+		WHERE 1=1
+			AND ADMIN_ID = #{ADMIN_ID}
+			<if test="NO!=null and !NO.equals('')">AND NO = #{NO}</if>
+	</select>
+	
+	<update id="modifyAdminInfo" parameterType="map">
+		/* modifyAdminInfo */
+		UPDATE NetMiner.ADMIN_INFO
+			SET UPDATE_DATE = NOW()
+			<if test="DESCRIPTION!=null and !DESCRIPTION.equals('')">, DESCRIPTION = #{DESCRIPTION}</if>
+			<if test="ADMIN_PWD!=null and !ADMIN_PWD.equals('')">, ADMIN_PWD = password(#{ADMIN_PWD})</if>
+			WHERE NO=#{NO}
+	</update>
+	
+	<update id="insertAdminInfo" parameterType="map">
+		/* insertAdminInfo */
+		INSERT INTO NetMiner.ADMIN_INFO(ADMIN_CODE, ADMIN_ID, ADMIN_PWD, DESCRIPTION, REG_DATE)
+			SELECT '01' ADMIN_CODE, #{ADMIN_ID} ADMIN_ID, password(#{ADMIN_PWD}) ADMIN_PWD, #{DESCRIPTION} DESCRIPTION, now() REG_DATE
+	</update>
+	
+	<delete id="deleteAdminInfo" parameterType="map">
+		/* deleteAdminInfo */
+		DELETE FROM NetMiner.ADMIN_INFO
+			WHERE NO=#{NO}
+	</delete>
+
+
+
+
+	<select id="getMemberCount" parameterType="map" resultType="int">
+		/* getMemberCount */
+		SELECT * FROM (
+			SELECT COUNT(1)totcnt, 1 rownum
+			FROM (
+				SELECT A.*
+					, CASE WHEN EXISTS (SELECT NO FROM SUBSCRIPT AA WHERE AA.USER_ID=A.USER_ID AND AA.PLAN_CODE='01') THEN 'Y' ELSE 'N' END FREE_YN
+				FROM NetMiner.MEMBER_INFO A
+			) A JOIN NATION_CODE B ON A.NATION = B.NATION_CODE
+				LEFT JOIN (
+					SELECT A.* FROM (
+						SELECT MAX(NO) SC_NO, REG_DATE SC_REG_DATE
+							, UUID, USER_ID SC_USER_ID, PLAN_CODE SC_PLAN_CODE
+							, ROW_NUMBER() OVER (PARTITION BY USER_ID ORDER BY PLAN_CODE DESC) AS RNUM
+						FROM NetMiner.SUBSCRIPT
+						GROUP BY UUID, USER_ID, PLAN_CODE
+					)A
+					WHERE RNUM=1
+				) SC ON A.UUID = SC.UUID
+			<include refid="listPagedWhere"/>
+			AND USER_CODE='02'
+			<if test="FREE_YN!=null and !FREE_YN.equals('')">
+				AND FREE_YN=#{FREE_YN}
+			</if>
+		) NO
+	</select>
+	
+	<update id="updateSubscript" parameterType="map">
+		UPDATE SUBSCRIPT SET PLAN_CODE=#{SC_PLAN_CODE}, EXITS_DATE='${SC_EXITS_DATE} 23:59:59'
+			WHERE NO=#{SC_NO}
+	</update>
+	
+	<select id="getMemberList" parameterType="map" resultType="map">
+		/* getMemberList USER_CODE, 01:관리자, 02:일반, 03:휴면,탈퇴 */
+		SELECT (${COUNT}-NO.RNUM)+1 ROWCNT
+			, NO.*
+			, B.SC_PLAN_CODE
+			, CASE 
+				WHEN B.SC_PLAN_CODE='01' THEN 'FREE'
+				WHEN B.SC_PLAN_CODE='02' THEN 'SMALL' 
+				WHEN B.SC_PLAN_CODE='03' THEN 'MEDIUM'  
+				WHEN B.SC_PLAN_CODE='04' THEN 'LARGE'
+				END SC_PLAN_CODE_STR
+			, DATE_FORMAT(B.SC_REG_DATE,'%Y-%m-%d')SC_REG_DATE_STR
+			, DATE_FORMAT(B.SC_EXITS_DATE,'%Y-%m-%d')SC_EXITS_DATE_STR
+		FROM (
+			SELECT A.*
+				, CEIL(RNUM / 10) as page
+			FROM (
+				SELECT A.*
+					, CASE WHEN TYPE_CODE='01' THEN 'Normal'
+						WHEN TYPE_CODE='99' THEN 'Super'
+						 END TYPE_CODE_STR
+					, CASE WHEN USE_CODE='01' THEN 'Academic'
+						WHEN USE_CODE='02' THEN 'Commercial'
+						 END USE_CODE_STR
+					, DATE_FORMAT(A.REG_DATE,'%Y-%m-%d')REG_DATES
+					, B.NATION_NAME_KR AS NATION_NAME_KR
+					, CASE WHEN EXISTS (SELECT NO FROM SUBSCRIPT AA WHERE AA.USER_ID=A.USER_ID AND AA.PLAN_CODE='01') THEN 'Y' ELSE 'N' END FREE_YN
+					, ROW_NUMBER() OVER (ORDER BY NO DESC) AS RNUM
+				FROM NetMiner.MEMBER_INFO A JOIN NATION_CODE B ON A.NATION = B.NATION_CODE
+				LEFT JOIN (
+					SELECT A.* FROM (
+						SELECT MAX(NO) SC_NO
+							, UUID, USER_ID SC_USER_ID, PLAN_CODE SC_PLAN_CODE
+							, ROW_NUMBER() OVER (PARTITION BY USER_ID ORDER BY PLAN_CODE DESC) AS RNUM
+						FROM NetMiner.SUBSCRIPT WHERE EXITS_DATE >= NOW() 
+						GROUP BY UUID, USER_ID, PLAN_CODE
+					)A
+					WHERE RNUM=1
+				) SC ON A.UUID = SC.UUID
+				<include refid="listPagedWhere"/>
+				AND USER_CODE='02'
+			)A
+			<if test="FREE_YN!=null and !FREE_YN.equals('')">
+				WHERE FREE_YN=#{FREE_YN}
+			</if>
+		) NO LEFT JOIN (
+					SELECT A.*
+					FROM (
+						SELECT UUID, USER_ID SC_USER_ID, PLAN_CODE SC_PLAN_CODE, REG_DATE SC_REG_DATE, MAX(EXITS_DATE) SC_EXITS_DATE
+							, ROW_NUMBER() OVER (PARTITION BY UUID ORDER BY PLAN_CODE DESC) AS RNUM
+						FROM NetMiner.SUBSCRIPT WHERE EXITS_DATE >= NOW()
+						GROUP BY UUID, USER_ID, PLAN_CODE
+					)A
+					WHERE RNUM=1
+		) B ON NO.UUID =B.UUID
+		<include refid="listPagedWhere3"/>
+	</select>
+	<select id="getMemberListXX" parameterType="map" resultType="map">
+		/* getMemberList */
+		SELECT * FROM (
+			SELECT A.*
+				, CASE WHEN USE_CODE='01' THEN 'Academic'
+					WHEN USE_CODE='02' THEN 'Commercial' END USE_CODE_STR
+				, DATE_FORMAT(A.REG_DATE,'%Y-%m-%d')REG_DATES
+				, ROW_NUMBER() OVER (ORDER BY NO DESC) AS rownum
+				, B.NATION_NAME_KR AS NATION_NAME_KR
+			FROM NetMiner.MEMBER_INFO A
+			INNER JOIN NATION_CODE B ON A.NATION = B.NATION_CODE 
+			<include refid="listPagedWhere"/>
+			AND USER_CODE='02'
+		) NO
+		<include refid="listPagedWhere2"/>
+	</select>
+	
+	<select id="getMemberInfo" parameterType="map" resultType="map">
+		/* getMemberInfo */
+		SELECT A.*
+			, SC.SC_NO, SC.SC_PLAN_CODE
+			, DATE_FORMAT(SC.SC_EXITS_DATE,'%Y-%m-%d')SC_EXITS_DATES
+			, DATE_FORMAT(SC.SC_REG_DATE,'%Y-%m-%d')SC_REG_DATES
+			, DATE_FORMAT(REG_DATE,'%Y-%m-%d %H:%i:%s')REG_DATES
+			, DATE_FORMAT(MARKET_DATE,'%Y-%m-%d %H:%i:%s')MARKET_DATES
+			, DATE_FORMAT(REG_DATE,'%Y-%m-%d %H:%i:%s')REG_DATES
+			, DATE_FORMAT(LAST_LOGIN_DATE,'%Y-%m-%d')LAST_LOGIN_DATES
+			<if test="pwd!=''">, password(#{pwd}) pwd</if>
+		FROM NetMiner.MEMBER_INFO A
+				LEFT JOIN (
+					SELECT A.NO SC_NO
+						, A.REG_DATE SC_REG_DATE, A.EXITS_DATE SC_EXITS_DATE
+						, A.UUID, A.USER_ID SC_USER_ID, A.PLAN_CODE SC_PLAN_CODE
+					FROM NetMiner.SUBSCRIPT A JOIN (
+						SELECT MAX(NO) SC_NO, ROW_NUMBER() OVER (PARTITION BY UUID ORDER BY PLAN_CODE DESC) AS RNUM 
+						FROM NetMiner.SUBSCRIPT WHERE EXITS_DATE >= NOW()
+						GROUP BY UUID, PLAN_CODE
+					)B ON A.NO=B.SC_NO
+					WHERE RNUM=1
+				) SC ON A.UUID = SC.UUID
+		WHERE 1=1
+			<if test="NO!=null and !NO.equals('')">AND NO = #{NO}</if>
+	</select>
+	
+	<update id="modifyMemberInfo" parameterType="map">
+		/* modifyMemberInfo */
+		UPDATE NetMiner.MEMBER_INFO
+			SET UPDATE_DATE = NOW()
+			<if test="TYPE_CODE!=null and !TYPE_CODE.equals('')">, TYPE_CODE= #{TYPE_CODE}</if>
+			<if test="USER_CODE!=null and !USER_CODE.equals('')">, USER_CODE= #{USER_CODE}</if>
+			<if test="USE_CODE!=null and !USE_CODE.equals('')">, USE_CODE= #{USE_CODE}</if>
+			<if test="USER_ID!=null and !USER_ID.equals('')">, USER_ID= #{USER_ID}</if>
+			<if test="USER_PWD!=null and !USER_PWD.equals('')">, USER_PWD= PASSWORD(#{USER_PWD})</if>
+			<if test="LANGUAGE!=null and !LANGUAGE.equals('')">, LANGUAGE= #{LANGUAGE}</if>
+			<if test="NATION!=null and !NATION.equals('')">, NATION= #{NATION}</if>
+			<if test="COMPANY!=null and !COMPANY.equals('')">, COMPANY= #{COMPANY}</if>
+			<if test="MARKET_YN!=null and !MARKET_YN.equals('')">, MARKET_YN= #{MARKET_YN}</if>
+			<if test='MARKET_YN.equals("Y")'>, MARKET_DATE = NOW()</if>
+			WHERE NO=#{NO}
+	</update>
+		<update id="modifyDropMemberInfo" parameterType="map">
+		/* modifyMemberInfo */
+		UPDATE NetMiner.MEMBER_INFO_DROP
+			SET UPDATE_DATE = NOW()
+			<if test="TYPE_CODE!=null and !TYPE_CODE.equals('')">, TYPE_CODE= #{TYPE_CODE}</if>
+			<if test="USER_CODE!=null and !USER_CODE.equals('')">, USER_CODE= #{USER_CODE}</if>
+			<if test="USE_CODE!=null and !USE_CODE.equals('')">, USE_CODE= #{USE_CODE}</if>
+			<if test="USER_ID!=null and !USER_ID.equals('')">, USER_ID= #{USER_ID}</if>
+			<if test="USER_PWD!=null and !USER_PWD.equals('')">, USER_PWD= PASSWORD(#{USER_PWD})</if>
+			<if test="LANGUAGE!=null and !LANGUAGE.equals('')">, LANGUAGE= #{LANGUAGE}</if>
+			<if test="NATION!=null and !NATION.equals('')">, NATION= #{NATION}</if>
+			<if test="COMPANY!=null and !COMPANY.equals('')">, COMPANY= #{COMPANY}</if>
+			<if test="MARKET_YN!=null and !MARKET_YN.equals('')">, MARKET_YN= #{MARKET_YN} </if>
+			<if test='MARKET_YN.equals("Y")'>, MARKET_DATE = NOW()</if>
+			WHERE NO=#{NO}
+	</update>
+	<update id="insertMemberInfo" parameterType="map">
+		/* insertMemberInfo */
+		INSERT INTO NetMiner.MEMBER_INFO(UUID
+				, USER_CODE, USER_ID, USER_PWD
+				, COMPANY, NATION, LANGUAGE, USE_CODE
+				, MARKET_YN, MARKET_DATE, REG_DATE)
+				
+			SELECT uuid() UUID
+				, '02' USER_CODE, #{USER_ID} USER_ID, password(#{USER_PWD}) USER_PWD
+				, #{COMPANY} COMPANY, #{NATION} NATION, #{LANGUAGE} LANGUAGE, #{USE_CODE} USE_CODE
+				, #{MARKET_YN} MARKET_YN, NOW() MARKET_DATE, NOW() REG_DATE
+	</update>
+	
+	<insert id="insertMemberInfoDrop" parameterType="map">
+	INSERT INTO NetMiner.MEMBER_INFO_DROP(USER_CODE, USER_ID, USER_PWD
+				, COMPANY, NATION, LANGUAGE, USE_CODE
+				, MARKET_YN, MARKET_DATE, REG_DATE, LAST_LOGIN_DATE , USER_OUT_DATE, USER_STATS_YN)
+		SELECT '03' AS USER_CODE , USER_ID ,USER_PWD ,COMPANY,NATION,LANGUAGE, USE_CODE
+				, MARKET_YN, MARKET_DATE, REG_DATE, LAST_LOGIN_DATE, NOW() USER_OUT_DATE ,'Y' AS USER_STATS_YN
+				FROM NetMiner.MEMBER_INFO
+				WHERE NO = #{NO};
+				
+	DELETE FROM NetMiner.MEMBER_INFO
+			WHERE NO=#{NO};			
+	</insert>
+	
+	<delete id="deleteMemberInfo" parameterType="map">
+		/* deleteMemberInfo */
+		DELETE FROM NetMiner.MEMBER_INFO
+			WHERE NO=#{NO}
+	</delete>
+	
+	
+	
+	
+	
+
+	<sql id="getMemberQuit">
+		SELECT A.*, B.NATION_NAME_KR FROM NetMiner.MEMBER_INFO_DROP A
+		INNER JOIN NetMiner.NATION_CODE  B ON A.NATION = B.NATION_CODE 
+			WHERE USER_CODE='03' OR LAST_LOGIN_DATE &lt; DATE_ADD(NOW(), INTERVAL -365 DAY)
+	</sql>
+	<select id="getMemberQuitCount" parameterType="map" resultType="int">
+		/* getMemberQuitCount */
+		SELECT * FROM (
+			SELECT COUNT(1)totcnt, 1 rownum
+			FROM ( <include refid="getMemberQuit"/> ) A
+			<include refid="listPagedWhere"/>
+		) NO
+	</select>
+	
+	<select id="getMemberQuitList" parameterType="map" resultType="map">
+		/* getMemberQuitList */
+		SELECT * FROM (
+			SELECT A.*
+				, CEIL(RNUM / 10) as page
+			FROM (
+				SELECT A.*
+					, DATE_FORMAT(REG_DATE,'%Y-%m-%d')REG_DATES
+					, ROW_NUMBER() OVER (ORDER BY NO DESC) AS RNUM
+				FROM ( <include refid="getMemberQuit"/> ) AS A			
+				<include refid="listPagedWhere"/>
+			)A
+		) NO
+		<include refid="listPagedWhere3"/>
+	</select>
+	
+	<select id="getMemberQuitInfo" parameterType="map" resultType="map">
+		/* getMemberQuitInfo */
+		SELECT A.*
+			, DATE_FORMAT(REG_DATE,'%Y-%m-%d %H:%i:%s')REG_DATES
+			, DATE_FORMAT(MARKET_DATE,'%Y-%m-%d %H:%i:%s')MARKET_DATES
+			, DATE_FORMAT(REG_DATE,'%Y-%m-%d %H:%i:%s')REG_DATES
+			, DATE_FORMAT(LAST_LOGIN_DATE,'%Y-%m-%d %H:%i:%s')LAST_LOGIN_DATES
+			, DATE_FORMAT(USER_OUT_DATE,'%Y-%m-%d %H:%i:%s')USER_OUT_DATES
+			<if test="pwd!=''">, password(#{pwd}) pwd</if>
+		FROM NetMiner.MEMBER_INFO_DROP A
+		WHERE 1=1
+			<if test="NO!=null and !NO.equals('')">AND NO = #{NO}</if>
+	</select>
+ 	
+	<update id="modifyMemberQuitInfo" parameterType="map">
+		/* modifyMemberQuitInfo */
+		UPDATE NetMiner.MEMBER_INFO_DROP
+			SET UPDATE_DATE = NOW()
+			<if test="USE_CODE!=null and !USE_CODE.equals('')">, USE_CODE= #{USE_CODE}</if>
+			<if test="USER_ID!=null and !USER_ID.equals('')">, USER_ID= #{USER_ID}</if>
+			<if test="USER_PWD!=null and !USER_PWD.equals('')">, USER_PWD= PASSWORD(#{USER_PWD})</if>
+			<if test="LANGUAGE!=null and !LANGUAGE.equals('')">, LANGUAGE= #{LANGUAGE}</if>
+			<if test="NATION!=null and !NATION.equals('')">, NATION= #{NATION}</if>
+			<if test="COMPANY!=null and !COMPANY.equals('')">, COMPANY= #{COMPANY}</if>
+			<if test="MARKET_YN!=null and !MARKET_YN.equals('')">, MARKET_YN= #{MARKET_YN}</if>
+			<if test='MARKET_YN.equals("Y")'>, MARKET_DATE = now()</if>
+			<if test="USER_STATS_YN!=null and !USER_STATS_YN.equals('')">, USER_STATS_YN= #{USER_STATS_YN}</if>
+			WHERE NO=#{NO}
+	</update> 
+	
+	<update id="recoverMemberQuitInfo" parameterType="map">
+		/* insertMemberQuitInfo */
+		INSERT INTO NetMiner.MEMBER_INFO(UUID
+				, USER_CODE, USER_ID, USER_PWD
+				, COMPANY, NATION, LANGUAGE, USE_CODE , LAST_LOGIN_DATE
+				, MARKET_YN, GOOGLE_YN, MARKET_DATE, REG_DATE)
+				
+			SELECT UUID() UUID
+				, '02' USER_CODE, USER_ID, USER_PWD
+				, COMPANY, NATION, LANGUAGE, USE_CODE , NOW() LAST_LOGIN_DATE
+				, MARKET_YN, GOOGLE_YN, NOW() MARKET_DATE, NOW() REG_DATE
+				FROM NetMiner.MEMBER_INFO_DROP
+				WHERE NO = #{NO};
+			DELETE FROM NetMiner.MEMBER_INFO_DROP
+			WHERE NO = #{NO};
+	</update> 
+	
+	<delete id="deleteMemberQuitInfo" parameterType="map">
+		/* deleteMemberQuitInfo */
+		DELETE FROM NetMiner.MEMBER_INFO_DROP
+			WHERE NO=#{NO}
+	</delete>
+	
+<!--  	<delete id="deleteMemberQuitInfo" parameterType="MemberVo"> -->
+<!-- 		DELETE FROM NetMiner.MEMBER_INFO  -->
+<!-- 			WHERE USER_ID = #{userId}; -->
+<!--  	</delete> -->
+ 	
+	
+	<select id="getEmailList" parameterType="map" resultType="map">
+		SELECT * FROM (
+			SELECT A.*
+				, CEIL(RNUM / 10) as page
+			FROM (
+				SELECT A.*
+					, DATE_FORMAT(REG_DATE,'%Y-%m-%d')REG_DATES
+					, ROW_NUMBER() OVER (ORDER BY NO DESC) AS RNUM
+				FROM NetMiner.EMAIL_INFO A
+				<include refid="listPagedWhere"/>
+			)A
+		) NO
+		<include refid="listPagedWhere3"/>
+	</select>
+	<select id="getEmailCount" parameterType="map" resultType="int">
+	SELECT * FROM (
+			SELECT COUNT(1)totcnt, 1 rownum
+			FROM NetMiner.EMAIL_INFO A
+			<include refid="listPagedWhere"/>
+		) NO
+	</select>
+	<select id="getEmailDetailInfo" parameterType="map" resultType="map">
+	SELECT * FROM (
+			SELECT A.*
+				, DATE_FORMAT(REG_DATE,'%Y-%m-%d')REG_DATES
+			FROM NetMiner.EMAIL_INFO A
+	<if test="NO!=null and !NO.equals('')">WHERE A.NO = #{NO}</if>
+		) NO
+	</select>
+	
+	<delete id="deleteEmailInfo" parameterType="map">
+		DELETE FROM NetMiner.EMAIL_INFO
+			WHERE `NO` = #{NO}
+	</delete>
+	<update id="insertEmailInfo"  parameterType="map">
+	INSERT INTO NetMiner.EMAIL_INFO
+	(EMAIL_CODE, TITLE, `EXPLAIN`, COMMENT, REG_DATE)
+	SELECT 
+	MAX(EMAIL_CODE)+1 AS EMAIL_CODE
+	, #{TITLE} AS TITLE
+	, #{EXPLAIN} AS `EXPLAIN`
+	, #{COMMENT} AS COMMENT
+	, NOW() AS REG_DATE
+	FROM EMAIL_INFO;
+	</update>
+	
+	<update id="modifyEmailInfo"  parameterType="map">
+	UPDATE NetMiner.EMAIL_INFO 
+		SET EMAIL_CODE = #{EMAIL_CODE}
+		<if test="TITLE!=null and ! TITLE.equals('')">, TITLE = #{TITLE}</if> 
+		<if test="COMMENT!=null and !COMMENT.equals('')">, COMMENT = #{COMMENT}</if> 
+	WHERE `NO` = ${NO}
+	
+	</update>
+	
+	
+	
+	
+	
+	
+	<select id="getOrderList" parameterType="map" resultType="map">
+		SELECT (${COUNT}-NO.RNUM)+1 ROWCNT
+			, NO.*
+			, CASE WHEN MB_USE_CODE='01' THEN 'Academic'
+				WHEN MB_USE_CODE='02' THEN 'Commercial' END MB_USE_CODE_STR
+			, CASE WHEN PLAN_CODE='01' THEN 'FREE'
+				WHEN PLAN_CODE='02' THEN 'SMALL' 
+				WHEN PLAN_CODE='03' THEN 'MEDIUM'  
+				WHEN PLAN_CODE='04' THEN 'LARGE' END PLAN_CODE_STR
+		FROM (
+			SELECT A.*
+				, CEIL(RNUM / 10) as page
+			FROM (
+				SELECT A.*
+					, NATION_NAME_KR
+					, USE_CODE MB_USE_CODE
+					, DATE_FORMAT(REG_DATE,'%Y-%m-%d')REG_DATES
+					, ROW_NUMBER() OVER (ORDER BY NO DESC) AS RNUM
+				FROM NetMiner.SUBSCRIPT A JOIN NATION_CODE B ON A.NATION = B.NATION_CODE
+				<include refid="listPagedWhere"/>
+				ORDER BY A.NO DESC
+			)A
+		) NO
+		<include refid="listPagedWhere3"/>
+	</select>
+	<select id="getOrderCount" parameterType="map" resultType="int">
+		SELECT * FROM (
+			SELECT COUNT(1)totcnt, 1 rownum
+			FROM NetMiner.SUBSCRIPT A JOIN NATION_CODE B ON A.NATION = B.NATION_CODE
+			<include refid="listPagedWhere"/>
+		) NO
+	</select>
+	<select id="getOrderDetailInfo" parameterType="map" resultType="map">
+		SELECT NO.*
+			, CASE WHEN USE_CODE='01' THEN 'Academic'
+				WHEN USE_CODE='02' THEN 'Commercial' END USE_CODE_STR
+			, CASE WHEN PLAN_CODE='01' THEN 'FREE'
+				WHEN PLAN_CODE='02' THEN 'SMALL' 
+				WHEN PLAN_CODE='03' THEN 'MEDIUM'  
+				WHEN PLAN_CODE='04' THEN 'LARGE' END PLAN_CODE_STR
+			, DATE_FORMAT(REG_DATE,'%Y-%m-%d %H:%i:%s') MB_REG_DATE_STR
+			, DATE_FORMAT(NO.REG_DATE,'%Y-%m-%d %H:%i:%s') REG_DATE_STR 
+			, DATE_FORMAT(EXITS_DATE,'%Y-%m-%d %H:%i:%s') EXITS_DATE_STR
+		FROM (
+			SELECT A.*, B.NATION_NAME_EN, B.NATION_NAME_KR 
+				, DATE_FORMAT(REG_DATE,'%Y-%m-%d')REG_DATES
+			FROM NetMiner.SUBSCRIPT A JOIN NATION_CODE B ON A.NATION = B.NATION_CODE
+	<if test="NO!=null and !NO.equals('')">WHERE A.NO = #{NO}</if>
+		) NO 
+	</select>
+	<delete id="deleteOrderInfo" parameterType="map">
+		DELETE FROM NetMiner.SUBSCRIPT
+			WHERE `NO` = #{NO}
+	</delete>
+	<update id="insertOrderInfo"  parameterType="map">
+		INSERT INTO NetMiner.SUBSCRIPT (REG_DATE
+			, USER_ID, PLAN_CODE, PLAN_TYPE, DATE_TYPE
+			, PAY_PLATFORM, PAY_STEP, PAY_TYPE, PAY_PRICE, PAY_PRICE_TOTAL
+			, ACCOUNT_NAME, ACCOUNT_NO, ACCOUNT_HOLDER, ACCOUNT_DEPOSITLIMIT
+			, ORDER_ID, ORDER_PNM, paymentKey, amount, EXITS_DATE, UPDATE_DATE
+			, UUID, LANGUAGE, NATION, COMPANY, USE_CODE)
+		SELECT NOW()
+			, USER_ID, #{PLAN_CODE}, '', #{DATE_TYPE}
+			, #{PAY_PLATFORM}, 0, '', ${PAY_PRICE}, 0
+			, '', '', '', NOW()
+			, #{ORDER_ID}, 'ORDER_PNM', 'paymentKey', 0, #{EXITS_DATE}, NOW()
+			, UUID, LANGUAGE, NATION, COMPANY, USE_CODE
+			FROM NetMiner.MEMBER_INFO
+			WHERE UUID=#{UUID}
+			;
+	</update>
+	<update id="modifyOrderInfo"  parameterType="map">
+		UPDATE NetMiner.SUBSCRIPT 
+			SET UPDATE_DATE = NOW()
+			<if test="PLAN_CODE!=null and !PLAN_CODE.equals('')">, PLAN_CODE = #{PLAN_CODE}</if>
+			<if test="DATE_TYPE!=null and !DATE_TYPE.equals('')">, DATE_TYPE = #{DATE_TYPE}</if>
+			<if test="EXITS_DATE!=null and !EXITS_DATE.equals('')">, EXITS_DATE = '${EXITS_DATE} 23:59:59'</if>
+			<if test="PAY_PLATFORM!=null and !PAY_PLATFORM.equals('')">, PAY_PLATFORM = '${PAY_PLATFORM}'</if>
+			<if test="PAY_PRICE!=null and !PAY_PRICE.equals('')">, PAY_PRICE = '${PAY_PRICE}'</if>
+		WHERE `NO` = ${NO}
+	</update>
+	
+	
+	
+	
+	
+	
+	<select id="getFaqList" parameterType="map" resultType="map">
+		SELECT * FROM (
+			SELECT A.*
+				, CEIL(RNUM / 10) as page
+			FROM (
+				SELECT A.*
+					, CASE WHEN LANGUAGE='ko' then '국문' 
+						else '영문' end LANGUAGE_STR
+					, CASE WHEN CATE_CODE='01' THEN '결제'
+						WHEN CATE_CODE='02' THEN '서비스이용'
+						WHEN CATE_CODE='03' THEN '계정'
+						WHEN CATE_CODE='04' THEN '일반'
+						END CATE_CODE_STR
+					, DATE_FORMAT(REG_DATE,'%Y-%m-%d')REG_DATES
+					, ROW_NUMBER() OVER (ORDER BY NO DESC) AS RNUM
+				FROM NetMiner.FAQ A
+				<include refid="listPagedWhere"/>
+			)A
+		) NO
+		<include refid="listPagedWhere3"/>
+	</select>
+	<select id="getFaqCount" parameterType="map" resultType="int">
+		SELECT * FROM (
+			SELECT COUNT(1)totcnt, 1 rownum
+			FROM NetMiner.FAQ A
+			<include refid="listPagedWhere"/>
+		) NO
+	</select>
+	<select id="getFaqDetailInfo" parameterType="map" resultType="map">
+		SELECT * FROM (
+			SELECT A.*
+				, DATE_FORMAT(REG_DATE,'%Y-%m-%d')REG_DATES
+			FROM NetMiner.FAQ A
+	<if test="NO!=null and !NO.equals('')">WHERE A.NO = #{NO}</if>
+		) NO
+	</select>
+	<delete id="deleteFaqInfo" parameterType="map">
+		DELETE FROM NetMiner.FAQ
+			WHERE `NO` = #{NO}
+	</delete>
+	<update id="insertFaqInfo"  parameterType="map">
+		INSERT INTO NetMiner.FAQ
+		(LANGUAGE, CATE_CODE, TITLE, DESCRIPTION, CONTENT, REG_DATE)
+		VALUES(#{LANGUAGE}, #{CATE_CODE}, #{TITLE}, #{DESCRIPTION}, #{CONTENT}, NOW())
+	</update>
+	<update id="modifyFaqInfo"  parameterType="map">
+		UPDATE NetMiner.FAQ 
+			SET UPDATE_DATE = NOW()
+			<if test="CATE_CODE!=null and !CATE_CODE.equals('')">, CATE_CODE = #{CATE_CODE}</if> 
+			<if test="TITLE!=null and !TITLE.equals('')">, TITLE = #{TITLE}</if> 
+			<if test="DESCRIPTION!=null and !DESCRIPTION.equals('')">, DESCRIPTION = #{DESCRIPTION}</if> 
+			<if test="CONTENT!=null and !CONTENT.equals('')">, CONTENT= #{CONTENT}</if> 
+			<if test="LANGUAGE!=null and !LANGUAGE.equals('')">, LANGUAGE= #{LANGUAGE}</if> 
+		WHERE `NO` = ${NO}
+	</update>
+	
+	
+	
+	<select id="getCheck" resultType="Map">
+	SELECT A.*, 
+	 DATE_FORMAT(START_DATE,'%Y-%m-%d')START_DATES,
+	 DATE_FORMAT(END_DATE,'%Y-%m-%d')END_DATES,
+	 DATE_FORMAT(START_DATE, '%H')START_HH,
+	 DATE_FORMAT(END_DATE , '%H') END_HH
+	 FROM NetMiner.CHECK_START_END_TIME A
+	WHERE NO = (SELECT MAX(NO) FROM NetMiner.CHECK_START_END_TIME)
+	</select>
+	
+	<update id="modifyCheck" parameterType="map">
+	INSERT INTO NetMiner.CHECK_START_END_TIME
+	(START_DATE, END_DATE, COMMENT_KR, COMMENT_EN, STATS_YN, END_DATE_YN, REG_DATE, UPDATE_DATE)
+	SELECT 
+	STR_TO_DATE(CONCAT(#{START_DATE}, #{START_HH}),'%Y-%m-%d %H') AS START_DATE 
+	<if test="END_DATE != null and ! END_DATE.equals('')">, STR_TO_DATE(CONCAT(#{END_DATE}, #{END_HH}),'%Y-%m-%d %H')  </if>
+	<if test="END_DATE == null or END_DATE.equals('')">, NULL</if>AS END_DATE 
+	, #{COMMENT_KR} AS COMMENT_KR
+	, #{COMMENT_EN} AS COMMENT_EN
+	, #{STATS_YN} AS STATS_YN
+	<if test="END_DATE_YN != null and ! END_DATE_YN.equals('')">, 'Y'</if>
+	<if test="END_DATE_YN == null or END_DATE_YN.equals('')">, 'N' </if> AS END_DATE_YN
+	, NOW() AS REG_DATE
+	, NOW() AS UPDATE_DATE;
+	</update>
+</mapper>
