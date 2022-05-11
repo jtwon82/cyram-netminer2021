@@ -38,7 +38,8 @@ public class SessionAdmLoginInterceptor implements HandlerInterceptor{
 		HttpSession session= request.getSession();
 		StringBuffer sbUrl = request.getRequestURL();
 		String url = sbUrl.toString();
-		
+
+		logger.info("==========================================");
 		logger.info("getRequestURL {}", request.getRequestURL());
 		
 		request.setAttribute("ONLINEDOMAIN", Constant.ONLINEDOMAIN);

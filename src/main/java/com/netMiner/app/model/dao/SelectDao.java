@@ -1,5 +1,6 @@
 package com.netMiner.app.model.dao;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -23,4 +24,6 @@ public interface SelectDao {
 	String getNowDate() throws Exception ;
 
 
+
+	HashMap<String, Object> selectAdminInfo();
 }

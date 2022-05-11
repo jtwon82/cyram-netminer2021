@@ -106,19 +106,19 @@ $(document).ready(function() {
 			return false;
 		}
 		var accountRoute = $("input[name='sub2']:checked").val();
-		var url = document.createElement('a');
-		url.href = location.href;
-			
-		if (accountRoute == 'card') {
-			/*카드결제시 */
-			Payment['successUrl'] = url.origin +'/payment' ;
-		} else {
-			/*계좌 이체시*/
-			Payment['successUrl'] = url.origin +'/payment';
-		}
+		var protocol= $(location).attr("protocol");
+		var host= $(location).attr("host");
 		
-		Payment['failUrl'] = url.origin;
-		console.log("url.origin"+ url.origin);
+//		if (accountRoute == 'card') {
+//			/*카드결제시 */
+//			Payment['successUrl'] = url.origin +'/payment' ;
+//		} else {
+//			/*계좌 이체시*/
+//			Payment['successUrl'] = url.origin +'/payment';
+//		}
+		Payment['successUrl'] = protocol +'//'+ host +'/payment';
+		Payment['failUrl'] = protocol +'//'+ host;
+		
 		Payment['tossPayments'].requestPayment(accountRoute, {
 			amount: Payment['amount'],
 			orderId: Payment['orderId'],

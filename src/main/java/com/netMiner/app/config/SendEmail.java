@@ -155,10 +155,14 @@ public class SendEmail {
 	//이메일 발송 Sender
 	private boolean sendMailSender(String userId, String comment,String title) {
 		boolean result = true;
-		String user = "netminer@cyram.com"; // 네이버일 경우 네이버 계정, gmail경우 gmail 계정
-        String password = "dydrkfl2011@";   // 패스워드
-        String host = "smtp.gmail.com";
+		
+		Map admin= selectDao.selectAdminInfo();
+		
+		String user= admin.get("EMAIL_ID").toString(); //"netminer@cyram.com"; // 네이버일 경우 네이버 계정, gmail경우 gmail 계정
+        String password= admin.get("EMAIL_PW").toString(); //"dydrkfl2011@";   // 패스워드
+        String host= "smtp.gmail.com";
         String senderUser = "NetMiner Team <netminer@cyram.com>";
+        
         // SMTP 서버 정보를 설정한다.
         Properties prop = new Properties();
 //        prop.put("mail.smtp.host", "smtp.gmail.com"); 

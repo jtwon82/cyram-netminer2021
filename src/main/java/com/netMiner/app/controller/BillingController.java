@@ -558,7 +558,6 @@ public class BillingController extends HttpServlet {
 		BillingVo billingVo = (BillingVo) session.getAttribute("billing");
 		String payNo =  request.getParameter("payNo");
 		
-		
 		logger.info("form {}", form);
 		logger.info("memberVo {}", memberVo);
 		logger.info("billingVo {}", billingVo);
@@ -567,52 +566,67 @@ public class BillingController extends HttpServlet {
 			StringUtils2.script(response, language, "잘못된 접근입니다.", "The wrong approach", "./");
 			return "redirect:/";
 		}
-		
-		else {			
-			if(form.getOrderId().equals(billingVo.getORDER_ID()) && payNo == null) {
+		else {
+			if (form.getOrderId().equals(billingVo.getORDER_ID()) && payNo == null) {
 				billingVo.setUSER_ID(memberVo.getUserId());
 				billingVo.setOrderId(form.getOrderId());
 				billingVo.setPaymentKey(form.getPaymentKey());
 				billingVo.setAmount(form.getAmount());
-				try {
-				HttpHeaders headers = new HttpHeaders();
-				headers.set("Authorization", "Basic " + Base64.getEncoder().encodeToString((Constant.TOSS_SECRET_KEY + ":").getBytes()));
-			    headers.setContentType(MediaType.APPLICATION_JSON);
-			    Map<String, String> payloadMap = new HashMap<>();
-		        payloadMap.put("orderId", form.getOrderId());
-		        payloadMap.put("amount", String.valueOf(form.getAmount()));		
-				HttpEntity<String> request1 = new HttpEntity<>(objectMapper.writeValueAsString(payloadMap), headers);
 				
-				ResponseEntity<JsonNode> responseEntity = restTemplate.postForEntity(
-		        "https://api.tosspayments.com/v1/payments/" + form.getPaymentKey(), request1, JsonNode.class);
-				 if (responseEntity.getStatusCode() == HttpStatus.OK) {
-					 JsonNode obj = responseEntity.getBody();
-					 JsonNode payTypeJson = obj.get("method");
-					 String payType = payTypeJson.toString();
-					 
-					 if (payType.indexOf("계좌이체") > -1) {
-						 payType="bank";
-					 } else {
-						 payType="card";
-					 }
-					 
-					 billingVo.setPAY_TYPE(payType);
-					 
-					 billingService.insertSubscript(billingVo);
-					 logger.info("insert succ billingVo {}", billingVo);
-					 session.setAttribute("billingVo", billingVo);
-					 return "redirect:/goSubscribeComplete";
-				 } else {
-					 return "redirect:/pricing";
-				 }
+				try {
+					HttpHeaders headers= new HttpHeaders();
+					headers.set("Authorization", "Basic " + Base64.getEncoder().encodeToString((Constant.TOSS_SECRET_KEY + ":").getBytes()));
+					headers.setContentType(MediaType.APPLICATION_JSON);
+					
+					Map<String, String> payloadMap= new HashMap<>();
+					payloadMap.put("orderId", form.getOrderId());
+					payloadMap.put("amount", String.valueOf(form.getAmount()));
+					
+					HttpEntity<String> request1= new HttpEntity<>(objectMapper.writeValueAsString(payloadMap),
+							headers);
+
+					ResponseEntity<JsonNode> responseEntity= restTemplate.postForEntity(
+							"https://api.tosspayments.com/v1/payments/" + form.getPaymentKey(), request1,
+							JsonNode.class);
+					logger.info("responseEntity {}", responseEntity);
+					
+					if (responseEntity!=null && responseEntity.getStatusCode() == HttpStatus.OK) {
+						JsonNode obj = responseEntity.getBody();
+						JsonNode payTypeJson = obj.get("method");
+						
+						
+						String payType = payTypeJson.toString();
+
+						if (payType.indexOf("계좌이체") > -1) {
+							payType = "bank";
+							
+							JsonNode transfer= obj.get("transfer");
+							logger.info("transfer {}", transfer);
+							if (transfer==null) {
+								StringUtils2.script(response, language, "결제에 실패했습니다.", "Sorry fail.", "./");
+								return "redirect:/";
+							}
+						} else {
+							payType = "card";
+						}
+
+						billingVo.setPAY_TYPE(payType);
+
+						billingService.insertSubscript(billingVo);
+						logger.info("insert succ billingVo {}", billingVo);
+						
+						session.setAttribute("billingVo", billingVo);
+						
+						return "redirect:/goSubscribeComplete";
+					} else {
+						return "redirect:/pricing";
+					}
 				} catch (Exception e) {
-					return "redirect:/fail";
+					return "redirect:/fail?e=";
 				}
 			} else {
-				
 				return "redirect:/";
 			}
-			
 		}
 	}
 

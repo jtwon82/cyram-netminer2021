@@ -28,7 +28,6 @@
 		
 		<script src="https://js.tosspayments.com/v1"></script>
 		<script type="text/javascript">
-		//live_ck_dP9BRQmyarYao7yYOaWrJ07KzLNk
 		var TOSS_CLIENT_KEY = "${TOSS_CLIENT_KEY}";
 		
 		var Payment=[];

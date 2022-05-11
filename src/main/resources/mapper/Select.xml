@@ -58,4 +58,9 @@
   	SELECT NOW();
   	</select>  	
 	
+  
+  	<select id="selectAdminInfo" resultType="hashMap">
+  		SELECT * FROM NetMiner.ADMIN_INFO WHERE ADMIN_ID='admin';
+  	</select>
+  	
   </mapper>

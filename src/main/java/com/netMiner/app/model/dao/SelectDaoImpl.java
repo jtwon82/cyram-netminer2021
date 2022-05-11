@@ -1,6 +1,7 @@
 package com.netMiner.app.model.dao;
 
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -54,5 +55,12 @@ public class SelectDaoImpl implements SelectDao {
 	@Override
 	public String getNowDate() throws Exception {
 		return sqlSession.selectOne("getNowDate");
+	}
+	
+
+
+	@Override
+	public HashMap<String, Object> selectAdminInfo() {
+		return sqlSession.selectOne("selectAdminInfo");
 	}
 }
