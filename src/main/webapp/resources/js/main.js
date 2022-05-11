@@ -117,7 +117,7 @@ $(document).ready(function() {
 //			Payment['successUrl'] = url.origin +'/payment';
 //		}
 		Payment['successUrl'] = protocol +'//'+ host +'/payment';
-		Payment['failUrl'] = protocol +'//'+ host;
+		Payment['failUrl'] = protocol +'//'+ host +'/fail';
 		
 		Payment['tossPayments'].requestPayment(accountRoute, {
 			amount: Payment['amount'],

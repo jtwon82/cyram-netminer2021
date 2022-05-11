@@ -592,19 +592,15 @@ public class BillingController extends HttpServlet {
 					
 					if (responseEntity!=null && responseEntity.getStatusCode() == HttpStatus.OK) {
 						JsonNode obj = responseEntity.getBody();
-						JsonNode payTypeJson = obj.get("method");
-						
-						
-						String payType = payTypeJson.toString();
-
+						String payType= obj.get("method").toString();
 						if (payType.indexOf("계좌이체") > -1) {
 							payType = "bank";
 							
 							JsonNode transfer= obj.get("transfer");
 							logger.info("transfer {}", transfer);
 							if (transfer==null) {
-								StringUtils2.script(response, language, "결제에 실패했습니다.", "Sorry fail.", "./");
-								return "redirect:/";
+//								StringUtils2.script(response, language, "결제에 실패했습니다.", "Sorry fail.", "./");
+//								return "redirect:/";
 							}
 						} else {
 							payType = "card";
