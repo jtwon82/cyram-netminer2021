@@ -22,24 +22,24 @@ public class Constant {
 	public static String ADMIN_SESSION= "ADMIN_SESSION";
 
 	// real
-	public static String ROOT_URL = "https://www.netminer365.com";
-	public static String GOOGLE_CALL_BACK_LOGIN_URL = "https://www.netminer365.com/auth";	
-	public static String GOOGLE_CALL_BACK_REGISTER_URL = "https://www.netminer365.com/socialRegister";
-	public static String TOSS_SECRET_KEY = "live_sk_lpP2YxJ4K87AD1JXz1LVRGZwXLOb";
-	public static String TOSS_CLIENT_KEY = "live_ck_dP9BRQmyarYao7yYOaWrJ07KzLNk";	
-	public static String PAY_PAL_URL = "https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&";
-	public static String PAY_PAL_BUSINESS="netminer@cyram.com";
-	public static String ONLINEDOMAIN= "online.netminer365.com";
+//	public static String ROOT_URL = "https://www.netminer365.com";
+//	public static String GOOGLE_CALL_BACK_LOGIN_URL = "https://www.netminer365.com/auth";	
+//	public static String GOOGLE_CALL_BACK_REGISTER_URL = "https://www.netminer365.com/socialRegister";
+//	public static String TOSS_SECRET_KEY = "live_sk_lpP2YxJ4K87AD1JXz1LVRGZwXLOb";
+//	public static String TOSS_CLIENT_KEY = "live_ck_dP9BRQmyarYao7yYOaWrJ07KzLNk";	
+//	public static String PAY_PAL_URL = "https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&";
+//	public static String PAY_PAL_BUSINESS="netminer@cyram.com";
+//	public static String ONLINEDOMAIN= "online.netminer365.com";
 
 	// dev
-//	public static String ROOT_URL = "http://dev.netminer365.com";
-//	public static String GOOGLE_CALL_BACK_LOGIN_URL = ROOT_URL +"/auth";	
-//	public static String GOOGLE_CALL_BACK_REGISTER_URL = ROOT_URL +"/socialRegister";
-//	public static String TOSS_SECRET_KEY = "test_sk_P24xLea5zVAAgzALk6YVQAMYNwW6";
-//	public static String TOSS_CLIENT_KEY = "test_ck_O6BYq7GWPVvZLyaDy1nVNE5vbo1d";
-//	public static String PAY_PAL_URL = "https://sandbox.paypal.com/cgi-bin/webscr?cmd=_xclick&";
-//	public static String PAY_PAL_BUSINESS="sb-gbvkr13290921@business.example.com";
-//	public static String ONLINEDOMAIN= "src.netminer.com:9009";
+	public static String ROOT_URL = "http://dev.netminer365.com";
+	public static String GOOGLE_CALL_BACK_LOGIN_URL = ROOT_URL +"/auth";	
+	public static String GOOGLE_CALL_BACK_REGISTER_URL = ROOT_URL +"/socialRegister";
+	public static String TOSS_SECRET_KEY = "test_sk_P24xLea5zVAAgzALk6YVQAMYNwW6";
+	public static String TOSS_CLIENT_KEY = "test_ck_O6BYq7GWPVvZLyaDy1nVNE5vbo1d";
+	public static String PAY_PAL_URL = "https://sandbox.paypal.com/cgi-bin/webscr?cmd=_xclick&";
+	public static String PAY_PAL_BUSINESS="sb-gbvkr13290921@business.example.com";
+	public static String ONLINEDOMAIN= "src.netminer.com:9009";
 	
 	// local
 //	public static String ROOT_URL = "http://localhost:8001";
