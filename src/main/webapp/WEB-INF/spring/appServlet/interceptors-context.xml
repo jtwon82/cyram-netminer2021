@@ -23,6 +23,11 @@
 			<beans:bean
 				class="com.netMiner.app.interceptor.SessionAdmLoginInterceptor" />
 		</interceptor>
+		<interceptor>
+			<mapping path="/" />
+			<beans:bean
+				class="com.netMiner.app.interceptor.RootHandlerInterseceptor" />
+		</interceptor>
 	</interceptors>
 
 </beans:beans>

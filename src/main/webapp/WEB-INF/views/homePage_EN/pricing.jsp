@@ -82,7 +82,7 @@ Compare our subscription plans and find yours.</p>
 										<c:if test="${!empty memberVo}">										
 										<c:if test="${memberVo.planType == 1}"> 
 										<p class="button active">
-											<a href="javascript:void(0)">Current Plan</a>
+											<a href="javascript:void(0)" style="cursor:default;">Current Plan</a>
 										</p>
 										</c:if>
 										<c:if test="${memberVo.planType < 1}"> 
@@ -120,7 +120,7 @@ Compare our subscription plans and find yours.</p>
 									</ul>
 									<ul class="feature">
 										<li><em></em>Machine Learning</li>
-										<li><em></em>Neural Network</br>(3 layers, 10 nodes)</li>
+										<li><em></em>Neural Network</br>(3 layers, 10 units)</li>
 										<li><em></em>Node Embedding</br>(10 dimensions)</li>
 										<li><em></em>Graph Centrality</li>
 										<li><em></em>Community Detection</li>
@@ -131,7 +131,7 @@ Compare our subscription plans and find yours.</p>
 									<c:if test="${!empty memberVo}">										
 										<c:if test="${memberVo.planType == 1}"> 
 										<p class="button active">
-											<a href="javascript:void(0)">Current Plan</a>
+											<a href="javascript:void(0)" style="cursor:default;">Current Plan</a>
 										</p>
 										</c:if>
 										<c:if test="${memberVo.planType < 1}"> 
@@ -171,7 +171,7 @@ Compare our subscription plans and find yours.</p>
 									<c:if test="${!empty memberVo}">
 											<c:if test="${memberVo.planType == 2}"> 
 											<p class="button active">
-												<a href="javascript:void(0);">Current Plan</a>
+												<a href="javascript:void(0);" style="cursor:default;">Current Plan</a>
 											</p>
 											</c:if>
 											<c:if test="${memberVo.planType < 2}"> 
@@ -202,7 +202,7 @@ Compare our subscription plans and find yours.</p>
 									</ul>
 									<ul class="feature">
 										<li><em></em>Machine Learning</li>
-										<li><em></em>Neural Network</br>(5 layers, 25 nodes)</li>
+										<li><em></em>Neural Network</br>(5 layers, 25 units)</li>
 										<li><em></em>Node Embedding</br>(25 dimensions)</li>
 										<li><em></em>Centrality</li>
 										<li><em></em>Community Detection</li>
@@ -213,7 +213,7 @@ Compare our subscription plans and find yours.</p>
 									<c:if test="${!empty memberVo}">
 											<c:if test="${memberVo.planType == 2}"> 
 											<p class="button active">
-												<a href="javascript:void(0);">Current Plan</a>
+												<a href="javascript:void(0);" style="cursor:default;">Current Plan</a>
 											</p>
 											</c:if>
 											<c:if test="${memberVo.planType < 2}"> 
@@ -247,7 +247,7 @@ Compare our subscription plans and find yours.</p>
 									<c:if test="${!empty memberVo}">										
 										<c:if test="${memberVo.planType == 3}"> 
 										<p class="button active">
-											<a href="javascript:void(0);">Current Plan</a>
+											<a href="javascript:void(0);" style="cursor:default;">Current Plan</a>
 										</p>
 										</c:if>
 										<c:if test="${memberVo.planType < 3}"> 
@@ -278,7 +278,7 @@ Compare our subscription plans and find yours.</p>
 									</ul>
 									<ul class="feature">
 										<li><em></em>Machine Learning</li>
-										<li><em></em>Neural Network</br>(10 layers, 50 nodes)</li>
+										<li><em></em>Neural Network</br>(10 layers, 50 units)</li>
 										<li><em></em>Node Embedding</br>(50 dimensions)</li>
 										<li><em></em>Centrality</li>
 										<li><em></em>Community Detection</li>
@@ -289,7 +289,7 @@ Compare our subscription plans and find yours.</p>
 									<c:if test="${!empty memberVo}">										
 										<c:if test="${memberVo.planType == 3}"> 
 										<p class="button active">
-											<a href="javascript:void(0);">Current Plan</a>
+											<a href="javascript:void(0);" style="cursor:default;">Current Plan</a>
 										</p>
 										</c:if>
 										<c:if test="${memberVo.planType < 3}"> 
@@ -322,7 +322,7 @@ Compare our subscription plans and find yours.</p>
 									<c:if test="${!empty memberVo}">										
 										<c:if test="${memberVo.planType == 4}"> 
 										<p class="button active">
-											<a href="javascript:void(0);">Current Plan</a>
+											<a href="javascript:void(0);" style="cursor:default;">Current Plan</a>
 										</p>
 										</c:if>
 										<c:if test="${memberVo.planType < 4}"> 
@@ -353,7 +353,7 @@ Compare our subscription plans and find yours.</p>
 									</ul>
 									<ul class="feature">
 									<li><em></em>Machine Learning</li>
-									<li><em></em>Neural Network</br>(20 layers, 100 nodes)</li>
+									<li><em></em>Neural Network</br>(20 layers, 100 units)</li>
 									<li><em></em>Node Embedding</br>(100 dimensions)</li>
 									<li><em></em>Centrality</li>
 									<li><em></em>Community Detection</li>
@@ -364,7 +364,7 @@ Compare our subscription plans and find yours.</p>
 									<c:if test="${!empty memberVo}">										
 										<c:if test="${memberVo.planType == 4}"> 
 										<p class="button active">
-											<a href="javascript:void(0);">Current Plan</a>
+											<a href="javascript:void(0);" style="cursor:default;">Current Plan</a>
 										</p>
 										</c:if>
 										<c:if test="${memberVo.planType < 4}"> 

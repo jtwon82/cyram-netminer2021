@@ -85,7 +85,7 @@ NetMiner 365 를 이용하세요.</p>
 								<c:if test="${!empty memberVo}">										
 										<c:if test="${memberVo.planType == 1}"> 
 										<p class="button active">
-											<a href="javascript:void(0)">현재 플랜</a>
+											<a href="javascript:void(0)" style="cursor:default;">현재 플랜</a>
 										</p>
 										</c:if>
 										<c:if test="${memberVo.planType < 1}"> 
@@ -123,7 +123,7 @@ NetMiner 365 를 이용하세요.</p>
 									</ul>
 									<ul class="feature">
 										<li><em></em>머신러닝</li>
-										<li><em></em>딥러닝 </br> &nbsp;&nbsp;&nbsp;&nbsp;(3개 레이어, 10개 노드)</li>
+										<li><em></em>딥러닝 </br> &nbsp;&nbsp;&nbsp;&nbsp;(3개 레이어, 10개 유닛)</li>
 										<li><em></em>노드 임베딩</br> &nbsp;&nbsp;&nbsp;&nbsp;(10개 차원)</li> 
  										<li><em></em>중심성 분석</li> 
 										<li><em></em>커뮤니티 탐지</li> 
@@ -140,7 +140,7 @@ NetMiner 365 를 이용하세요.</p>
 										<c:if test="${!empty memberVo}">										
 										<c:if test="${memberVo.planType == 1}"> 
 										<p class="button active">
-											<a href="javascript:void(0)">현재 플랜</a>
+											<a href="javascript:void(0)" style="cursor:default;">현재 플랜</a>
 										</p>
 										</c:if>
 										<c:if test="${memberVo.planType < 1}"> 
@@ -180,7 +180,7 @@ NetMiner 365 를 이용하세요.</p>
 										<c:if test="${!empty memberVo}">
 											<c:if test="${memberVo.planType == 2}"> 
 											<p class="button active">
-												<a href="javascript:void(0);">현재 플랜</a>
+												<a href="javascript:void(0);" style="cursor:default;">현재 플랜</a>
 											</p>
 											</c:if>
 											<c:if test="${memberVo.planType < 2}"> 
@@ -211,7 +211,7 @@ NetMiner 365 를 이용하세요.</p>
 									</ul>
 									<ul class="feature">
 										<li><em></em>머신러닝</li>
-										<li><em></em>딥러닝 </br>(5개 레이어, 25개 노드)</li>
+										<li><em></em>딥러닝 </br>(5개 레이어, 25개 유닛)</li>
 										<li><em></em>노드 임베딩</br>(25개 차원)</li>
 										<li><em></em>중심성 분석</li>
 										<li><em></em>커뮤니티 탐지</li>
@@ -222,7 +222,7 @@ NetMiner 365 를 이용하세요.</p>
 									<c:if test="${!empty memberVo}">
 											<c:if test="${memberVo.planType == 2}"> 
 											<p class="button active">
-												<a href="javascript:void(0);">현재 플랜</a>
+												<a href="javascript:void(0);" style="cursor:default;">현재 플랜</a>
 											</p>
 											</c:if>
 											<c:if test="${memberVo.planType < 2}"> 
@@ -256,7 +256,7 @@ NetMiner 365 를 이용하세요.</p>
 									<c:if test="${!empty memberVo}">										
 										<c:if test="${memberVo.planType == 3}"> 
 										<p class="button active">
-											<a href="javascript:void(0);">현재 플랜</a>
+											<a href="javascript:void(0);" style="cursor:default;">현재 플랜</a>
 										</p>
 										</c:if>
 										<c:if test="${memberVo.planType < 3}"> 
@@ -287,7 +287,7 @@ NetMiner 365 를 이용하세요.</p>
 									</ul>
 									<ul class="feature">
 										<li><em></em>머신러닝</li>
-										<li><em></em>딥러닝</br>(10개 레이어, 50개 노드)</li>
+										<li><em></em>딥러닝</br>(10개 레이어, 50개 유닛)</li>
 										<li><em></em>노드 임베딩</br>(50개 차원)</li>
 										<li><em></em>중심성 분석</li>
 										<li><em></em>커뮤니티 탐지</li>
@@ -298,7 +298,7 @@ NetMiner 365 를 이용하세요.</p>
 									<c:if test="${!empty memberVo}">										
 										<c:if test="${memberVo.planType == 3}"> 
 										<p class="button active">
-											<a href="javascript:void(0);">현재 플랜</a>
+											<a href="javascript:void(0);" style="cursor:default;">현재 플랜</a>
 										</p>
 										</c:if>
 										<c:if test="${memberVo.planType < 3}"> 
@@ -331,7 +331,7 @@ NetMiner 365 를 이용하세요.</p>
 									<c:if test="${!empty memberVo}">										
 										<c:if test="${memberVo.planType == 4}"> 
 										<p class="button active">
-											<a href="javascript:void(0);">현재 플랜</a>
+											<a href="javascript:void(0);" style="cursor:default;">현재 플랜</a>
 										</p>
 										</c:if>
 										<c:if test="${memberVo.planType < 4}"> 
@@ -362,7 +362,7 @@ NetMiner 365 를 이용하세요.</p>
 									</ul>
 									<ul class="feature">
 										<li><em></em>머신러닝</li>
-										<li><em></em>딥러닝</br>(20개 레이어, 100개 노드)</li>
+										<li><em></em>딥러닝</br>(20개 레이어, 100개 유닛)</li>
 										<li><em></em>노드 임베딩</br>(100개 차원)</li>
 										<li><em></em>중심성 분석</li>
 										<li><em></em>커뮤니티 탐지</li>
@@ -373,7 +373,7 @@ NetMiner 365 를 이용하세요.</p>
 									<c:if test="${!empty memberVo}">										
 										<c:if test="${memberVo.planType == 4}"> 
 										<p class="button active">
-											<a href="javascript:void(0);">현재 플랜</a>
+											<a href="javascript:void(0);" style="cursor:default;">현재 플랜</a>
 										</p>
 										</c:if>
 										<c:if test="${memberVo.planType < 4}"> 
